@@ -6,12 +6,21 @@ import numpy as np
 import sys
 from tkinter import *
 from tkinter import filedialog
-import Ass2
 import OpenCVCanvas
 import ButtonState
 import threading
+from Orbit import Orbit
 
-class Ass2GUI(Tk):
+# Default flight parameters
+centerX1 = 0
+centerY1 = 0
+majorAxis1 = 400
+minorAxis1 = 300
+axisYawAngle1 = 0
+height1 = 100
+orbit1 = Orbit(centerX1, centerY1, majorAxis1, minorAxis1, axisYawAngle1, height1)
+
+class UAVautocalGUI(Tk):
 	
 	def __init__(self):
 		# Call super constructor
@@ -35,58 +44,58 @@ class Ass2GUI(Tk):
 		menu3 = Frame(self)
 		menu3.pack()
 		
-		#  Add a load button to the menu bar
-		loadButton = Button(menu1, text='Load Ground', command=self.loadGround)
-		loadButton.pack(side=LEFT)
-		
-		#  Add a run button to the menu bar
-		runButton = Button(menu1, text='Run', command=self.run)
+		#  Add playback control buttons to the menu bar
+		actionButton = Button(menu1, command=self.actionButton)
+		actionButton.pack(side=LEFT)
+		runButton = Button(menu1, command=self.runButton)
 		runButton.pack(side=LEFT)
 		
-		#  Allow the user to pause the playback
-		pauseButton = Button(menu1, text='Pause', command=self.pause)
-		pauseButton.pack(side=LEFT)
-		
-		#  Register the initial state of the GUI 
-		self.buttonState = ButtonState.ButtonState(loadButton, runButton, pauseButton, ButtonState.ButtonState.State.INIT)
+		#  Register the initial state of the buttons 
+		self.buttonState = ButtonState.ButtonState(actionButton, runButton)
 				
 		# Allow the user some control over the playback speed
 		self.delay = StringVar()
 		self.delay.set(0)
 		Label(menu1, text = "Speed").pack(side=LEFT)
 		Spinbox(menu1, from_=0, to=1, increment=.1, textvariable=self.delay).pack(side=LEFT)
-		
-		# Algorithm parameters
-		
-		# Initial Gaussian blur sigma level. 
-		#self.blurSigma = StringVar()
-		#self.blurSigma.set(5)
-		#Label(menu2, text = "Blur Sigma").pack(side=LEFT)
-		#Spinbox(menu2, from_=1, to=15, increment=1, textvariable=self.blurSigma).pack(side=LEFT)
+				
+		# Orbit 1 major axis length 
+		self.orbit1MajorAxis = StringVar()
+		self.orbit1MajorAxis.set(majorAxis1)
+		Label(menu2, text = "Orbit1 Major Axis Length").pack(side=LEFT)
+		Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbit1MajorAxis, command = lambda: orbit1.setMajorAxis(int(self.orbit1MajorAxis.get()))).pack(side=LEFT)
 
-		## Size of erode element for motion detect result.  Uses sqaure-shaped element
-		#self.erodeElementSize = StringVar()
-		#self.erodeElementSize.set(3)
-		#Label(menu2, text = "Erode Size").pack(side=LEFT)
-		#Spinbox(menu2, from_=0, to=20, increment=1, textvariable=self.erodeElementSize).pack(side=LEFT)
+		# Orbit 1 minor axis length 
+		self.orbit1MinorAxis = StringVar()
+		self.orbit1MinorAxis.set(minorAxis1)
+		Label(menu2, text = "Orbit1 Minor Axis Length").pack(side=LEFT)
+		Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbit1MinorAxis, command = lambda: orbit1.setMajorAxis(int(self.orbit1MinorAxis.get()))).pack(side=LEFT)
 
-		## Size of dilate element for motion detect result.  Uses sqaure-shaped element
-		#self.dilateElementSize = StringVar()
-		#self.dilateElementSize.set(3)
-		#Label(menu2, text = "Dilate Size").pack(side=LEFT)
-		#Spinbox(menu2, from_=0, to=20, increment=1, textvariable=self.dilateElementSize).pack(side=LEFT)
+		# Orbit 1 center X
+		self.orbit1CenterX = StringVar()
+		self.orbit1CenterX.set(centerX1)
+		Label(menu2, text = "Orbit1 Center X").pack(side=LEFT)
+		Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbit1CenterX, command = lambda: orbit1.setMajorAxis(int(self.orbit1CenterX.get()))).pack(side=LEFT)
 
-		## minimum value for contours to count
-		#self.minContour = StringVar()
-		#self.minContour.set(100)
-		#Label(menu2, text = "Contour Threshold").pack(side=LEFT)
-		#Spinbox(menu2, from_=0, to=300, increment=10, textvariable=self.minContour).pack(side=LEFT)
+		# Orbit 1 center Y
+		self.orbit1CenterY = StringVar()
+		self.orbit1CenterY.set(centerY1)
+		Label(menu2, text = "Orbit1 Center Y").pack(side=LEFT)
+		Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbit1CenterY, command = lambda: orbit1.setMajorAxis(int(self.orbit1CenterY.get()))).pack(side=LEFT)
 
-		## Minimum centroid distance for a new object
-		#self.minCentDist = StringVar()
-		#self.minCentDist.set(30)
-		#Label(menu2, text = "Min Contour Distance").pack(side=LEFT)
-		#Spinbox(menu2, from_=0, to=200, increment=5, textvariable=self.minCentDist).pack(side=LEFT)
+		# Orbit 1 yaw angle
+		self.orbit1AxisYawAngle = StringVar()
+		self.orbit1AxisYawAngle.set(axisYawAngle1)
+		Label(menu2, text = "Orbit1 Yaw Angle").pack(side=LEFT)
+		Spinbox(menu2, from_=0, to=6.28, increment=.1, textvariable=self.orbit1AxisYawAngle, command = lambda: orbit1.setMajorAxis(float(self.orbit1AxisYawAngle.get()))).pack(side=LEFT)
+
+		# Orbit 1 height
+		self.orbit1Height = StringVar()
+		self.orbit1Height.set(height1)
+		Label(menu2, text = "Orbit1 Height").pack(side=LEFT)
+		Spinbox(menu2, from_=40, to=500, increment=20, textvariable=self.orbit1Height, command = lambda: orbit1.setMajorAxis(int(self.orbit1Height.get()))).pack(side=LEFT)
+
+
 		
 		# Display video(s) row
 		videoRow1 = Frame(self)
@@ -117,16 +126,29 @@ class Ass2GUI(Tk):
 		# Initial state of processing thread is empty
 		self.t = None
 		
-	def loadGround(self):
-		# Use the deafault tkinter file open dialog
-		self.groundFile = filedialog.askopenfilename()
+	def actionButton(self):
+
+		# Action: Load
+		if self.buttonState.getState() == ButtonState.ButtonState.State.INIT or \
+		   self.buttonState.getState() == ButtonState.ButtonState.State.LOADED:
 		
-		# make sure the user didn't hit 'Cancel'		
-		if self.groundFile:
-			#  Start the processing thread
-			self.run()
+			# Use the deafault tkinter file open dialog
+			self.groundFile = filedialog.askopenfilename()
+		
+			# make sure the user didn't hit 'Cancel'		
+			if self.groundFile:
+				self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
+
+		# Action: Pause
+		elif self.buttonState.getState() == ButtonState.ButtonState.State.RUNNING:
+			self.buttonState.setState(ButtonState.ButtonState.State.PAUSED)
 			
-	def run(self):
+		# Action: Reset
+		elif self.buttonState.getState() == ButtonState.ButtonState.State.PAUSED:
+			# Reset the images....
+			self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
+			
+	def runButton(self):
 		
 		self.buttonState.setState(ButtonState.ButtonState.State.RUNNING)
 		
@@ -143,19 +165,17 @@ class Ass2GUI(Tk):
 		self.t.setDaemon(True)
 		self.t.start()
 				
-		
-	def pause(self):
-		self.buttonState.setState(ButtonState.ButtonState.State.PAUSED)
+				
 			
 	def flyUAV(self):
 				
-		while cap.isOpened() and img is not None:
+		while True:#cap.isOpened() and img is not None:
 
 			# If we're paused, just chill
 			if self.buttonState.getState() == ButtonState.ButtonState.State.PAUSED:
 				continue
 											
-
+			self.step()
 			
 			# Have we enabled speed control?
 			delay = float(self.delay.get())
@@ -163,15 +183,15 @@ class Ass2GUI(Tk):
 				time.sleep(delay)
 				
 		# Processing is over.
-		self.buttonState.setState(ButtonState.ButtonState.State.STOPPED)
+		self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
 
-	def processFrame(self, img):
+	def step(self):
 		
 		# make sure the image is OK
-		if img is None:
+		if None is None:
 			return
 
 
 
-app = Ass2GUI()
+app = UAVautocalGUI()
 app.mainloop()

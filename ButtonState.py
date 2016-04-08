@@ -1,41 +1,36 @@
-# Matt Kaplan - Assigment 2
+# Matt Kaplan 
 # CISC 849 -  Spring '16
 
 from enum import Enum
 
-# Simple encapsulation of button state for video playback
+# Simple encapsulation of button state for UAV stepping
 class ButtonState():
 
 	class State(Enum):
 		INIT = 0
-		RUNNING = 1
-		PAUSED = 2
-		STOPPED = 3
+		LOADED = 1
+		RUNNING = 2
+		PAUSED = 3
 	
-	def __init__(self, loadButton, runButton, pauseButton, state):
-		self.loadButton = loadButton
-		self.runButton = runButton
-		self.pauseButton = pauseButton
-		self.setState(state)
+	def __init__(self, button1, button2):
+		self.button1 = button1
+		self.button2 = button2		
+		self.setState(ButtonState.State.INIT)
 			
 	def setState(self, newState):
 		self.state = newState
 		if newState == ButtonState.State.INIT:
-			self.loadButton.config(state="normal")
-			self.runButton.config(state="disabled")
-			self.pauseButton.config(state="disabled")
+			self.button1.config(text='Load', state="normal")
+			self.button2.config(text='Run', state="disabled")
+		if newState == ButtonState.State.LOADED:
+			self.button1.config(text='Load', state="normal")
+			self.button2.config(text='Run', state="normal")
 		if newState == ButtonState.State.RUNNING:
-			self.loadButton.config(state="disabled")
-			self.runButton.config(state="disabled")
-			self.pauseButton.config(state="normal")	
+			self.button1.config(text='Pause', state="normal")
+			self.button2.config(text='Run', state="disabled")	
 		if newState == ButtonState.State.PAUSED:
-			self.loadButton.config(state="disabled")
-			self.runButton.config(state="normal")
-			self.pauseButton.config(state="disabled")	
-		if newState == ButtonState.State.STOPPED:
-			self.loadButton.config(state="normal")
-			self.runButton.config(state="normal")
-			self.pauseButton.config(state="disabled")	
+			self.button1.config(text='Reset', state="normal")
+			self.button2.config(text='Run', state="normal")	
 		
 	def getState(self):
 		return self.state
