@@ -11,6 +11,10 @@ import ButtonState
 import threading
 from Orbit import Orbit
 
+# Set up the orbit step array
+n = 20
+pos = np.linspace(0,2*np.pi,n)
+
 # Default flight parameters
 centerX1 = 0
 centerY1 = 0
@@ -122,6 +126,8 @@ class UAVautocalGUI(Tk):
 		#self.videoCanvas6 = OpenCVCanvas.OpenCVCanvas(videoRow2, height=windowHeight, width=windowWidth)
 		#self.videoCanvas6.pack(side=LEFT)
 		
+		# Where are we in the positional array?
+		self.npos = 0
 		
 		# Initial state of processing thread is empty
 		self.t = None
@@ -147,6 +153,7 @@ class UAVautocalGUI(Tk):
 		elif self.buttonState.getState() == ButtonState.ButtonState.State.PAUSED:
 			# Reset the images....
 			self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
+			self.npos = 0
 			
 	def runButton(self):
 		
@@ -169,13 +176,19 @@ class UAVautocalGUI(Tk):
 			
 	def flyUAV(self):
 				
-		while True:#cap.isOpened() and img is not None:
-
+		while self.npos < len(pos):
+			
 			# If we're paused, just chill
 			if self.buttonState.getState() == ButtonState.ButtonState.State.PAUSED:
 				continue
+				
+			# If we're reset, get out
+			if self.buttonState.getState() == ButtonState.ButtonState.State.LOADED:
+				break
+
 											
 			self.step()
+			self.npos += 1
 			
 			# Have we enabled speed control?
 			delay = float(self.delay.get())
@@ -184,12 +197,11 @@ class UAVautocalGUI(Tk):
 				
 		# Processing is over.
 		self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
+		self.npos = 0
 
 	def step(self):
 		
-		# make sure the image is OK
-		if None is None:
-			return
+		print(self.npos)
 
 
 
