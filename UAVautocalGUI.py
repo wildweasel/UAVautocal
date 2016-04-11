@@ -17,8 +17,8 @@ n = 20
 # Default flight parameters
 centerX1 = 0
 centerY1 = 0
-majorAxis1 = 40
-minorAxis1 = 30
+majorAxis1 = 500
+minorAxis1 = 200
 axisYawAngle1 = 0
 height1 = 100
 
@@ -78,32 +78,40 @@ class UAVautocalGUI(Tk):
 		# Orbit 1 major axis length 
 		self.orbitCanvas.majorAxis.set(majorAxis1)
 		Label(menu2, text = "Orbit1 Major Axis Length").pack(side=LEFT)
-		Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.majorAxis, command=self.orbitCanvas.calcFlightPath).pack(side=LEFT)
+		orbit1MajorSpinbox = Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.majorAxis, command=self.orbitCanvas.calcFlightPath)
+		orbit1MajorSpinbox.pack(side=LEFT)
 
 		# Orbit 1 minor axis length 
 		self.orbitCanvas.minorAxis.set(minorAxis1)
 		Label(menu2, text = "Orbit1 Minor Axis Length").pack(side=LEFT)
-		Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.minorAxis, command=self.orbitCanvas.calcFlightPath).pack(side=LEFT)
+		orbit1MinorSpinbox = Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.minorAxis, command=self.orbitCanvas.calcFlightPath)
+		orbit1MinorSpinbox.pack(side=LEFT)
 
 		# Orbit 1 center X
 		self.orbitCanvas.centerX.set(centerX1)
 		Label(menu2, text = "Orbit1 Center X").pack(side=LEFT)
-		Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerX, command=self.orbitCanvas.calcFlightPath).pack(side=LEFT)
+		orbit1CenterXSpinbox = Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerX, command=self.orbitCanvas.calcFlightPath)
+		orbit1CenterXSpinbox.pack(side=LEFT)
 
 		# Orbit 1 center Y
 		self.orbitCanvas.centerY.set(centerY1)
 		Label(menu2, text = "Orbit1 Center Y").pack(side=LEFT)
-		Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerY, command=self.orbitCanvas.calcFlightPath).pack(side=LEFT)
+		orbit1CenterYSpinbox = Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerY, command=self.orbitCanvas.calcFlightPath)
+		orbit1CenterYSpinbox.pack(side=LEFT)
 
 		# Orbit 1 yaw angle
 		self.orbitCanvas.axisYawAngle.set(axisYawAngle1)
 		Label(menu2, text = "Orbit1 Yaw Angle").pack(side=LEFT)
-		Spinbox(menu2, from_=0, to=180, increment=10, textvariable=self.orbitCanvas.axisYawAngle, command=self.orbitCanvas.calcFlightPath).pack(side=LEFT)
+		orbit1YawAngleSpinbox = Spinbox(menu2, from_=0, to=180, increment=10, textvariable=self.orbitCanvas.axisYawAngle, command=self.orbitCanvas.calcFlightPath)
+		orbit1YawAngleSpinbox.pack(side=LEFT)
 
 		# Orbit 1 height
 		self.orbitCanvas.height.set(height1)
 		Label(menu2, text = "Orbit1 Height").pack(side=LEFT)
-		Spinbox(menu2, from_=40, to=500, increment=20, textvariable=self.orbitCanvas.height, command=self.orbitCanvas.calcFlightPath).pack(side=LEFT)
+		orbit1HeightSpinbox = Spinbox(menu2, from_=40, to=500, increment=20, textvariable=self.orbitCanvas.height, command=self.orbitCanvas.calcFlightPath)
+		orbit1HeightSpinbox.pack(side=LEFT)
+		
+		self.orbit1Controls = [orbit1MajorSpinbox, orbit1MinorSpinbox, orbit1CenterXSpinbox, orbit1CenterYSpinbox, orbit1YawAngleSpinbox, orbit1HeightSpinbox]
 
 		self.orbitCanvas.setResolution(n)
 
@@ -126,17 +134,23 @@ class UAVautocalGUI(Tk):
 		# Action: Pause
 		elif self.buttonState.getState() == ButtonState.ButtonState.State.RUNNING:
 			self.buttonState.setState(ButtonState.ButtonState.State.PAUSED)
+
 			
 		# Action: Reset
 		elif self.buttonState.getState() == ButtonState.ButtonState.State.PAUSED:
 			# Reset the images....
 			self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
 			self.npos = 0
+			for control in self.orbit1Controls:
+				control.config(state="normal")
 			self.orbitCanvas.calcFlightPath()
 			
 	def runButton(self):
 		
 		self.buttonState.setState(ButtonState.ButtonState.State.RUNNING)
+		
+		for control in self.orbit1Controls:
+			control.config(state="disabled")
 		
 		# If the worker thread is already active (because we came from PAUSED), 
 		# 	the change to RUNNING state is all that needs done
@@ -150,8 +164,6 @@ class UAVautocalGUI(Tk):
 		# because this is a daemon, it will die when the main window dies
 		self.t.setDaemon(True)
 		self.t.start()
-				
-				
 			
 	def flyUAV(self):
 				
@@ -176,14 +188,13 @@ class UAVautocalGUI(Tk):
 				
 		# Processing is over.
 		self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
+		for control in self.orbit1Controls:
+			control.config(state="normal")
 		self.npos = 0
 
 	def step(self):
 		
 		self.orbitCanvas.mapFlightPath(self.npos)
 		
-
-
-
 app = UAVautocalGUI()
 app.mainloop()
