@@ -21,6 +21,11 @@ majorAxis1 = 500
 minorAxis1 = 200
 axisYawAngle1 = 0
 height1 = 100
+camera1Pan = 0
+camera1Tilt = 90
+camera1UpAngle = 0
+
+focalLength = 100
 
 class UAVautocalGUI(Tk):
 	
@@ -78,40 +83,65 @@ class UAVautocalGUI(Tk):
 		# Orbit 1 major axis length 
 		self.orbitCanvas.majorAxis.set(majorAxis1)
 		Label(menu2, text = "Orbit1 Major Axis Length").pack(side=LEFT)
-		orbit1MajorSpinbox = Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.majorAxis, command=self.orbitCanvas.calcFlightPath)
+		orbit1MajorSpinbox = Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.majorAxis, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		orbit1MajorSpinbox.pack(side=LEFT)
 
 		# Orbit 1 minor axis length 
 		self.orbitCanvas.minorAxis.set(minorAxis1)
 		Label(menu2, text = "Orbit1 Minor Axis Length").pack(side=LEFT)
-		orbit1MinorSpinbox = Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.minorAxis, command=self.orbitCanvas.calcFlightPath)
+		orbit1MinorSpinbox = Spinbox(menu2, from_=20, to=500, increment=10, textvariable=self.orbitCanvas.minorAxis, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		orbit1MinorSpinbox.pack(side=LEFT)
 
 		# Orbit 1 center X
 		self.orbitCanvas.centerX.set(centerX1)
 		Label(menu2, text = "Orbit1 Center X").pack(side=LEFT)
-		orbit1CenterXSpinbox = Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerX, command=self.orbitCanvas.calcFlightPath)
+		orbit1CenterXSpinbox = Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerX, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		orbit1CenterXSpinbox.pack(side=LEFT)
 
 		# Orbit 1 center Y
 		self.orbitCanvas.centerY.set(centerY1)
 		Label(menu2, text = "Orbit1 Center Y").pack(side=LEFT)
-		orbit1CenterYSpinbox = Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerY, command=self.orbitCanvas.calcFlightPath)
+		orbit1CenterYSpinbox = Spinbox(menu2, from_=-200, to=200, increment=10, textvariable=self.orbitCanvas.centerY, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		orbit1CenterYSpinbox.pack(side=LEFT)
 
 		# Orbit 1 yaw angle
 		self.orbitCanvas.axisYawAngle.set(axisYawAngle1)
 		Label(menu2, text = "Orbit1 Yaw Angle").pack(side=LEFT)
-		orbit1YawAngleSpinbox = Spinbox(menu2, from_=0, to=180, increment=10, textvariable=self.orbitCanvas.axisYawAngle, command=self.orbitCanvas.calcFlightPath)
+		orbit1YawAngleSpinbox = Spinbox(menu2, from_=0, to=180, increment=10, textvariable=self.orbitCanvas.axisYawAngle, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		orbit1YawAngleSpinbox.pack(side=LEFT)
 
 		# Orbit 1 height
 		self.orbitCanvas.height.set(height1)
 		Label(menu2, text = "Orbit1 Height").pack(side=LEFT)
-		orbit1HeightSpinbox = Spinbox(menu2, from_=40, to=500, increment=20, textvariable=self.orbitCanvas.height, command=self.orbitCanvas.calcFlightPath)
+		orbit1HeightSpinbox = Spinbox(menu2, from_=40, to=500, increment=20, textvariable=self.orbitCanvas.height, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		orbit1HeightSpinbox.pack(side=LEFT)
-		
-		self.orbit1Controls = [orbit1MajorSpinbox, orbit1MinorSpinbox, orbit1CenterXSpinbox, orbit1CenterYSpinbox, orbit1YawAngleSpinbox, orbit1HeightSpinbox]
+				
+		# Orbit 1 Camera Pan
+		self.orbitCanvas.cameraPan.set(camera1Pan)
+		Label(menu3, text = "Orbit1 Camera Pan").pack(side=LEFT)
+		camera1PanSpinbox = Spinbox(menu3, from_=-90, to=90, increment=5, textvariable=self.orbitCanvas.cameraPan, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
+		camera1PanSpinbox.pack(side=LEFT)
+
+		# Orbit 1 Camera Tilt
+		self.orbitCanvas.cameraTilt.set(camera1Tilt)
+		Label(menu3, text = "Orbit1 Camera Tilt").pack(side=LEFT)
+		camera1TiltSpinbox = Spinbox(menu3, from_=-180, to=180, increment=5, textvariable=self.orbitCanvas.cameraTilt, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
+		camera1TiltSpinbox.pack(side=LEFT)
+
+		# Orbit 1 Camera Up Angle
+		self.orbitCanvas.cameraUpAngle.set(camera1UpAngle)
+		Label(menu3, text = "Orbit1 Camera Up Angle").pack(side=LEFT)
+		orbit1CameraUpAngleSpinbox = Spinbox(menu3, from_=-90, to=90, increment=5, textvariable=self.orbitCanvas.cameraUpAngle, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
+		orbit1CameraUpAngleSpinbox.pack(side=LEFT)
+
+		# Camera Focal Length
+		self.cameraFocalLength = StringVar()
+		self.cameraFocalLength.set(focalLength)
+		Label(menu3, text = "Focal Length").pack(side=LEFT)
+		focalLengthSpinbox = Spinbox(menu3, from_= 10, to=1000, increment=10, textvariable=self.cameraFocalLength, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
+		focalLengthSpinbox.pack(side=LEFT)
+
+		self.orbit1Controls = [orbit1MajorSpinbox, orbit1MinorSpinbox, orbit1CenterXSpinbox, orbit1CenterYSpinbox, orbit1YawAngleSpinbox, orbit1HeightSpinbox, camera1PanSpinbox, camera1TiltSpinbox, camera1TiltSpinbox]
 
 		self.orbitCanvas.setResolution(n)
 
@@ -128,7 +158,7 @@ class UAVautocalGUI(Tk):
 		   self.buttonState.getState() == ButtonState.ButtonState.State.LOADED:
 		
 			# Get an image
-			if self.orbitCanvas.loadOverhead():
+			if self.orbitCanvas.loadOverhead(float(self.cameraFocalLength.get())):
 				self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
 
 		# Action: Pause
@@ -143,7 +173,7 @@ class UAVautocalGUI(Tk):
 			self.npos = 0
 			for control in self.orbit1Controls:
 				control.config(state="normal")
-			self.orbitCanvas.calcFlightPath()
+			self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get()))
 			
 	def runButton(self):
 		
@@ -176,7 +206,6 @@ class UAVautocalGUI(Tk):
 			# If we're reset, get out
 			if self.buttonState.getState() == ButtonState.ButtonState.State.LOADED:
 				break
-
 											
 			self.step()
 			self.npos += 1
@@ -194,7 +223,10 @@ class UAVautocalGUI(Tk):
 
 	def step(self):
 		
-		self.orbitCanvas.mapFlightPath(self.npos)
+		UAVview = self.orbitCanvas.mapFlightPath(self.npos)
+			
+		self.videoCanvas2.publishArray(UAVview)
+		
 		
 app = UAVautocalGUI()
 app.mainloop()
