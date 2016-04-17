@@ -21,68 +21,53 @@ class OrbitCamera:
 
 	def moveCamera(self, pos, heading):
 		
-		cameraHeading = heading + self.pan
+		print("heading: ", heading)
 		
-		
-		#groundPlanePos = np.concatenate([pos,[0],[1]])
-		
+		# 3-D World (input overhead image) coords:
+		#	positive x-axis:  East
+		#	positive y-axis:  South
+		#	positive z-axis:  Up		
+		# Camera Translation - where is the UAV?
 		translation = np.array([[1,0,0,-pos[0]],
 								[0,1,0,-pos[1]],
 								[0,0,1,-pos[2]]])
 		
-		
+		# 3-D UAV (camera) coords:  
+		#	positive x-axis:  South
+		#	positive y-axis:  Down
+		#	positive z-axis:  East
 		axesAdj = np.array( [[0, 1, 0],
-							 [0, 0, 1],
+							 [0, 0, -1],
 							 [1, 0, 0]])
-		
-		# Camera Translation - where is the UAV?
-		#translation = np.array([[1,0,pos[0]],
-		#						[0,1,pos[1]],
-		#						[0,0,1]])
-		
 
-								
-		#print(translation)
+		# This camera pans (with heading) first, then tilts, then adjusts up
+		# http://planning.cs.uiuc.edu/node102.html
 		
-		# Camera Principal Axis - pan & tilt the UAV heading
-		
-		# Pan = Yaw; Tilt = Pitch; Up = Roll
-		# R = R_up * R_tilt * R_yaw
-		# R = | (cos a)(cos B)   				      -(sin a)(cos B)  						  sin B 		 |
-		#	  | (sin a)(cos Y)+(cos a)(sin B)(sin Y)   (cos a)(cos Y)-(sin a)(sin B)(sin Y)  -sin Y 		 |
-		#	  | (sin a)(sin Y)-(cos a)(sin B)(cos Y)   (cos a)(sin Y)+(sin a)(sin B)(cos Y)   (cos B)(cos Y) |
-		
-		#a = cameraHeading/180.0*np.pi
-		#B = -self.tilt/180.0*np.pi
-		#Y = self.up/180.0*np.pi
-		
-		# pan is a CW rotation around y-axis, a/k/a negative pitch
-		B = -cameraHeading/180.0*np.pi
-		# tilt is a CW rotation around x-axis, a/k/a negative roll
+		# pan (CW around y-axis) = negative pitch 
+		# incorporates UAV heading (CCW)
+		B = heading - self.pan/180.0*np.pi
+		pitch = np.array([[np.cos(B), 0, np.sin(B)],
+					  [0,1,0],
+					  [-np.sin(B), 0, np.cos(B)]])
+					  
+		# tilt = roll (CCW around x-axis)
 		Y = self.tilt/180.0*np.pi
-		# up is a rotation around z-axis, a/k/a yaw
-		a = self.up/180.0*np.pi
-		
-		#R = np.array([[np.cos(a)*np.cos(B), 							 -np.sin(a)*np.cos(B), 								  np.sin(B)],
-		#			  [np.sin(a)*np.cos(Y)+np.cos(a)*np.sin(B)*np.sin(Y), np.cos(a)*np.cos(Y)+np.sin(a)*np.sin(B)*np.sin(Y), -np.sin(Y)],
-		#			  [np.sin(a)*np.sin(Y)-np.cos(a)*np.sin(B)*np.cos(Y), np.cos(a)*np.sin(Y)+np.sin(a)*np.sin(B)*np.cos(Y),  np.cos(B)*np.cos(Y)]])
-		
-		# tilt only
-		R = np.array([[1,0,0],
+		roll = np.array([[1,0,0],
 					  [0, np.cos(Y), -np.sin(Y)],
 					  [0, np.sin(Y),  np.cos(Y)]])
-		
-		
-		#R = np.array([[1,0,0],
-		#			  [0,0,-1],
-		#			  [0,1,0]])
 					  
-		#print ("R: ", R)
+		# up = yaw (CCW around z-axis)
+		a = self.up/180.0*np.pi
+		yaw = np.array([[np.cos(a), -np.sin(a), 0],
+					  [np.sin(a),  np.cos(a), 0],
+					  [0,0,1]])
+					  
+		R = yaw.dot(roll.dot(pitch))
+
 				
 		extrinsic = R.dot(axesAdj.dot(translation))
 		
 		homography = np.delete(self.intrinsicCameraMatrix.dot(extrinsic), 2, 1)
-		print(pos)
 		
 		#print ("homography", homography)
 		return homography

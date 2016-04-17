@@ -12,7 +12,7 @@ import ButtonState
 import threading
 
 # Set up the orbit step array
-n = 20
+n = 100
 
 # Default flight parameters
 centerX1 = 0
@@ -20,12 +20,12 @@ centerY1 = 0
 majorAxis1 = 500
 minorAxis1 = 200
 axisYawAngle1 = 0
-height1 = 100
+height1 = 60
 camera1Pan = 0
-camera1Tilt = 90
+camera1Tilt = 45
 camera1UpAngle = 0
 
-focalLength = 100
+focalLength = 250
 
 class UAVautocalGUI(Tk):
 	
@@ -141,7 +141,9 @@ class UAVautocalGUI(Tk):
 		focalLengthSpinbox = Spinbox(menu3, from_= 10, to=1000, increment=10, textvariable=self.cameraFocalLength, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
 		focalLengthSpinbox.pack(side=LEFT)
 
-		self.orbit1Controls = [orbit1MajorSpinbox, orbit1MinorSpinbox, orbit1CenterXSpinbox, orbit1CenterYSpinbox, orbit1YawAngleSpinbox, orbit1HeightSpinbox, camera1PanSpinbox, camera1TiltSpinbox, camera1TiltSpinbox]
+		self.orbit1Controls = [orbit1MajorSpinbox, orbit1MinorSpinbox, orbit1CenterXSpinbox, orbit1CenterYSpinbox, orbit1YawAngleSpinbox, 
+							   orbit1HeightSpinbox, camera1PanSpinbox, camera1TiltSpinbox, camera1TiltSpinbox, orbit1CameraUpAngleSpinbox,
+							   focalLengthSpinbox]
 
 		self.orbitCanvas.setResolution(n)
 
