@@ -20,9 +20,7 @@ class OrbitCamera:
 		self.up = up
 
 	def moveCamera(self, pos, heading):
-		
-		print("heading: ", heading)
-		
+				
 		# 3-D World (input overhead image) coords:
 		#	positive x-axis:  East
 		#	positive y-axis:  South
@@ -69,7 +67,6 @@ class OrbitCamera:
 		
 		homography = np.delete(self.intrinsicCameraMatrix.dot(extrinsic), 2, 1)
 		
-		#print ("homography", homography)
 		return homography
 		
 		

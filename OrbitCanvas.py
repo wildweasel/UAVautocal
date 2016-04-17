@@ -5,6 +5,10 @@ from OpenCVCanvas import OpenCVCanvas
 from OrbitCamera import OrbitCamera
 from numpy.linalg import inv
 
+# Corners of the UAV camera view
+xMax = 400
+yMax = 300
+
 class OrbitCanvas(OpenCVCanvas):
 	
 	def __init__(self, *args, **kwargs):
@@ -23,7 +27,7 @@ class OrbitCanvas(OpenCVCanvas):
 		
 		self.rawOverhead = None
 
-		self.orbitCamera = OrbitCamera((400,300))
+		self.orbitCamera = OrbitCamera((xMax, yMax))
 
 		
 	def setResolution(self, resolution):
@@ -87,13 +91,9 @@ class OrbitCanvas(OpenCVCanvas):
 				
 		# Find the transformation matrix for our current UAV camera view
 		homography = self.orbitCamera.moveCamera(pos, heading)
-				
-		# Corners of the UAV camera view
-		xMax = 400
-		yMax = 300
-		corners = [[0,0,1],[xMax, 0, 1],[xMax, yMax, 1],[0, yMax, 1]]
-		
+						
 		# Map the camera view corners back to the points on the overhead...
+		corners = [[0,0,1],[xMax, 0, 1],[xMax, yMax, 1],[0, yMax, 1]]
 		invH = inv(homography)		
 		cornersI = [p2eI(invH.dot(x)) for x in corners]
 		# ... so we can show the portion of the overhead we're currently looking at
@@ -102,7 +102,7 @@ class OrbitCanvas(OpenCVCanvas):
 
 		self.publishArray(currentOverheadPath)
 
-		return cv2.warpPerspective(self.rawOverhead, homography, (400,300))
+		return cv2.warpPerspective(self.rawOverhead, homography, (xMax, yMax))
 		
 def p2eI(perspectiveCoord):
 	return tuple([int(x) for x in perspectiveCoord[0:-1]/perspectiveCoord[-1]])
