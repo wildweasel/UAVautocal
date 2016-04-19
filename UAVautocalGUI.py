@@ -12,7 +12,7 @@ from Orbit import Orbit
 from OrbitControl import OrbitControl
 import ButtonState
 import threading
-from Algos import getHomography
+from Algos import *
 
 # Set up the orbit step array
 nSteps = 100
@@ -31,28 +31,28 @@ centerY1Init = 0
 majorAxis1Init = 500
 minorAxis1Init = 200
 axisYawAngle1Init = 0
-height1Init = 60
-cameraPan1Init = 0
+height1Init = 150
+cameraPan1Init = -90
 cameraTilt1Init = 45
 cameraUpAngle1Init = 0
 
-centerX2Init = 0
-centerY2Init = 0
-majorAxis2Init = 500
+centerX2Init = 20
+centerY2Init = 30
+majorAxis2Init = 400
 minorAxis2Init = 200
 axisYawAngle2Init = 0
-height2Init = 60
-cameraPan2Init = 0
+height2Init = 200
+cameraPan2Init = -90
 cameraTilt2Init = 45
 cameraUpAngle2Init = 0
 
-centerX3Init = 0
-centerY3Init = 0
-majorAxis3Init = 500
-minorAxis3Init = 200
+centerX3Init = -30
+centerY3Init = -10
+majorAxis3Init = 600
+minorAxis3Init = 150
 axisYawAngle3Init = 0
 height3Init = 60
-cameraPan3Init = 0
+cameraPan3Init = -90
 cameraTilt3Init = 45
 cameraUpAngle3Init = 0
 
@@ -61,9 +61,13 @@ xMax = 400
 yMax = 300
 
 orbit1Image1Pos = (0, 20)
-orbit1Image2Pos = (0, 30)
+orbit1Image2Pos = (0, 22)
+orbit2Image1Pos = (1, 50)
+orbit2Image2Pos = (1, 52)
+orbit3Image1Pos = (2, 10)
+orbit3Image2Pos = (2, 12)
 
-imagePos = [orbit1Image1Pos, orbit1Image2Pos]
+imagePos = [orbit1Image1Pos, orbit1Image2Pos, orbit2Image1Pos, orbit2Image2Pos, orbit3Image1Pos, orbit3Image2Pos]
 images = []
 
 homographies = []
@@ -310,12 +314,17 @@ class UAVautocalGUI(Tk):
 			delay = float(self.delay.get())
 			if  delay > 0:
 				time.sleep(delay)
-				
+
+		#self.videoCanvas2.publishArray(images[0])
+		#self.videoCanvas3.publishArray(images[1])
+
 		# Run the calculations
 		for i in range(int(len(images)/2)):
+			print(2*i, 2*i+1)
 			homographies.append(getHomography(images[2*i], images[2*i+1]))
 					
-		print(homographies)
+					
+		calibrate(homographies)
 				
 		# Processing is over.
 		self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
