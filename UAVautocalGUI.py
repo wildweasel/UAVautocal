@@ -12,6 +12,7 @@ from Orbit import Orbit
 from OrbitControl import OrbitControl
 import ButtonState
 import threading
+from Algos import getHomography
 
 # Set up the orbit step array
 nSteps = 100
@@ -58,6 +59,14 @@ cameraUpAngle3Init = 0
 # Corners of the UAV camera view
 xMax = 400
 yMax = 300
+
+orbit1Image1Pos = (0, 20)
+orbit1Image2Pos = (0, 30)
+
+imagePos = [orbit1Image1Pos, orbit1Image2Pos]
+images = []
+
+homographies = []
 
 class UAVautocalGUI(Tk):
 	
@@ -254,7 +263,7 @@ class UAVautocalGUI(Tk):
 			self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
 			self.npos = 0
 			self.orbit1Controls.enable()
-			self.orbitCanvas.calcFlightPath(self.cameraMatrix)
+			#self.orbitCanvas.changeOrbitParams(self.cameraMatrix)
 			
 	def runButton(self):
 		
@@ -287,13 +296,26 @@ class UAVautocalGUI(Tk):
 			if self.buttonState.getState() == ButtonState.ButtonState.State.LOADED:
 				break
 											
-			self.step()
+			UAVview = self.step()
+			self.videoCanvas2.publishArray(UAVview)
+
+			for image in imagePos:
+				if self.npos == nSteps*image[0] + image[1]:
+					print ("click")
+					images.append(UAVview)
+
 			self.npos += 1
 			
 			# Have we enabled speed control?
 			delay = float(self.delay.get())
 			if  delay > 0:
 				time.sleep(delay)
+				
+		# Run the calculations
+		for i in range(int(len(images)/2)):
+			homographies.append(getHomography(images[2*i], images[2*i+1]))
+					
+		print(homographies)
 				
 		# Processing is over.
 		self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
@@ -303,9 +325,8 @@ class UAVautocalGUI(Tk):
 
 	def step(self):
 		
-		UAVview = self.orbitCanvas.run(self.npos)
+		return self.orbitCanvas.run(self.npos)
 			
-		self.videoCanvas2.publishArray(UAVview)
 		
 		
 app = UAVautocalGUI()
