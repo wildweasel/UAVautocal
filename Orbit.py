@@ -20,7 +20,7 @@ class Orbit:
 	def setOverhead(self, overhead):
 		self.rawOverhead = overhead.copy()
 	
-	def calcFlightPath(self, focalLength):
+	def calcFlightPath(self, cameraMatrix):
 		
 		if self.rawOverhead is None:
 			print("Error: Attempted to calcFlightPath while self.rawOverhead was None")
@@ -46,8 +46,8 @@ class Orbit:
 		self.flightHeadings = [np.arctan2(-a*np.sin(t)*np.sin(alpha)+b*np.cos(t)*np.cos(alpha),
 							   -a*np.sin(t)*np.cos(alpha)-b*np.cos(t)*np.sin(alpha)) for t in np.linspace(0,2*np.pi,self.resolution)]
 		
-		self.orbitCamera.buildCamera(focalLength, (0,0), float(self.cameraPan.get()), float(self.cameraTilt.get()), float(self.cameraUpAngle.get()))
-		
+		self.orbitCamera.buildCamera(cameraMatrix, float(self.cameraPan.get()), float(self.cameraTilt.get()), float(self.cameraUpAngle.get()))
+
 		self.overheadFlightPath = self.rawOverhead.copy()	
 		
 		for pos in self.flightPath:

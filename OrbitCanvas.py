@@ -6,9 +6,6 @@ from Orbit import Orbit
 from OrbitCamera import OrbitCamera
 from numpy.linalg import inv
 
-# Corners of the UAV camera view
-xMax = 400
-yMax = 300
 
 class OrbitCanvas(OpenCVCanvas):
 	
@@ -17,7 +14,7 @@ class OrbitCanvas(OpenCVCanvas):
 		self.resolution = 20
 		self.orbits = []
 		
-	def addOrbit(self, textVars):
+	def addOrbit(self, textVars, xMax, yMax):
 		self.orbits.append(Orbit(xMax, yMax, textVars, self.resolution))		
 
 	def setResolution(self, resolution):		
@@ -36,12 +33,12 @@ class OrbitCanvas(OpenCVCanvas):
 			
 		return loaded	
 		
-	def changeOrbitParams(self, orbitNumber, focalLength):
+	def changeOrbitParams(self, orbitNumber, cameraMatrix):
 		if orbitNumber >= len(self.orbits):
 			print("Error:  Attempted to changeOrbitParams of an orbitNumber that does not exist")
 			return
 			
-		self.publishArray(self.orbits[orbitNumber].calcFlightPath(focalLength))
+		self.publishArray(self.orbits[orbitNumber].calcFlightPath(cameraMatrix))
 		
 		
 	def run(self, pos):

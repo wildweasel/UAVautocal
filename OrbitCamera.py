@@ -6,13 +6,10 @@ class OrbitCamera:
 	def __init__(self, imageSize):
 		self.imageSize = imageSize
 		
-	def buildCamera(self, f, cameraCenter, pan, tilt, up):		
-	
-		t_x = self.imageSize[0]/2 + cameraCenter[0]
-		t_y = self.imageSize[1]/2 + cameraCenter[1]
+	def buildCamera(self, cameraMatrix, pan, tilt, up):		
 	
 		# Intrinsic Camera Matrix
-		self.intrinsicCameraMatrix = np.array([[f,0,t_x],[0,f,t_y],[0,0,1]])
+		self.intrinsicCameraMatrix = cameraMatrix
 		
 		# Extrinsic Parameters
 		self.pan = pan

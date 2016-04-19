@@ -16,7 +16,13 @@ import threading
 # Set up the orbit step array
 nSteps = 100
 
-nOrbits = 2
+nOrbits = 3
+
+# Camera parameters
+xFocalLengthInit = 250
+yFocalLengthInit = 250
+cameraCenterXInit = 0
+cameraCenterYInit = 0
 
 # Default flight parameters
 centerX1Init = 0
@@ -39,7 +45,19 @@ cameraPan2Init = 0
 cameraTilt2Init = 45
 cameraUpAngle2Init = 0
 
-focalLength = 250
+centerX3Init = 0
+centerY3Init = 0
+majorAxis3Init = 500
+minorAxis3Init = 200
+axisYawAngle3Init = 0
+height3Init = 60
+cameraPan3Init = 0
+cameraTilt3Init = 45
+cameraUpAngle3Init = 0
+
+# Corners of the UAV camera view
+xMax = 400
+yMax = 300
 
 class UAVautocalGUI(Tk):
 	
@@ -60,7 +78,6 @@ class UAVautocalGUI(Tk):
 		# Build the menu bars
 		menu1 = Frame(self)
 		menu1.pack()
-		Frame(self,height=2,width=screen_width,bg="black").pack()
 		menu2 = Frame(self)
 		menu2.pack()
 		Frame(self,height=2,width=screen_width,bg="black").pack()
@@ -73,7 +90,12 @@ class UAVautocalGUI(Tk):
 		menu5.pack()
 		menu6 = Frame(self)
 		menu6.pack()
-				
+		Frame(self,height=2,width=screen_width,bg="black").pack()
+		menu7 = Frame(self)
+		menu7.pack()
+		menu8 = Frame(self)
+		menu8.pack()
+			
 		#  Add playback control buttons to the menu bar
 		actionButton = Button(menu1, command=self.actionButton)
 		actionButton.pack(side=LEFT)
@@ -103,12 +125,32 @@ class UAVautocalGUI(Tk):
 		self.videoCanvas3 = OpenCVCanvas(videoRow1, height=windowHeight, width=windowWidth)
 		self.videoCanvas3.pack(side=LEFT)
 		
-		# Camera Focal Length
-		self.cameraFocalLength = StringVar()
-		self.cameraFocalLength.set(focalLength)
-		Label(menu2, text = "Focal Length").pack(side=LEFT)
-		focalLengthSpinbox = Spinbox(menu2, from_= 10, to=1000, increment=10, textvariable=self.cameraFocalLength, command=lambda: self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get())))
-		focalLengthSpinbox.pack(side=LEFT)
+		# Camera Parameters		
+		self.cameraMatrix = np.array([[xFocalLengthInit, 0, cameraCenterXInit+xMax/2],[0, yFocalLengthInit, cameraCenterYInit+yMax/2],[0,0,1]])
+		
+		self.cameraXFocalLength = StringVar()
+		self.cameraXFocalLength.set(xFocalLengthInit)
+		Label(menu2, text = "fX Focal Length").pack(side=LEFT)
+		cameraXFocalLengthSpinbox = Spinbox(menu2, from_= 10, to=1000, increment=10, textvariable=self.cameraXFocalLength, command=lambda: self.editCameraMatrix((0,0), float(self.cameraXFocalLength.get())))
+		cameraXFocalLengthSpinbox.pack(side=LEFT)
+		
+		self.cameraYFocalLength = StringVar()
+		self.cameraYFocalLength.set(yFocalLengthInit)
+		Label(menu2, text = "fY Focal Length").pack(side=LEFT)
+		cameraYFocalLengthSpinbox = Spinbox(menu2, from_= 10, to=1000, increment=10, textvariable=self.cameraYFocalLength, command=lambda: self.editCameraMatrix((1,1), float(self.cameraYFocalLength.get())))
+		cameraYFocalLengthSpinbox.pack(side=LEFT)
+		
+		self.cameraCenterX = StringVar()
+		self.cameraCenterX.set(cameraCenterXInit)
+		Label(menu2, text = "Camera Center Offset X").pack(side=LEFT)
+		cameraCenterXSpinbox = Spinbox(menu2, from_= -200, to=200, increment=10, textvariable=self.cameraCenterX, command=lambda: self.editCameraMatrix((0,2), float(self.cameraCenterX.get())))
+		cameraCenterXSpinbox.pack(side=LEFT)
+		
+		self.cameraCenterY = StringVar()
+		self.cameraCenterY.set(cameraCenterYInit)
+		Label(menu2, text = "Camera Center Offset Y").pack(side=LEFT)
+		cameraCenterYSpinbox = Spinbox(menu2, from_= -20, to=200, increment=10, textvariable=self.cameraCenterY, command=lambda: self.editCameraMatrix((1,2), float(self.cameraCenterY.get())))
+		cameraCenterYSpinbox.pack(side=LEFT)
 		
 		self.orbitCanvas.setResolution(nSteps)
 
@@ -132,8 +174,8 @@ class UAVautocalGUI(Tk):
 		cameraTilt1.set(cameraTilt1Init)
 
 		orbit1TextVars = [majorAxis1, minorAxis1, centerX1, centerY1, axisYawAngle1, height1, cameraPan1, cameraTilt1, cameraUpAngle1]					
-		self.orbitCanvas.addOrbit(orbit1TextVars)															
-		self.orbit1Controls = OrbitControl(menu3, menu4, orbit1TextVars, lambda: self.orbitCanvas.changeOrbitParams(0,float(self.cameraFocalLength.get())))		
+		self.orbitCanvas.addOrbit(orbit1TextVars, xMax, yMax)															
+		self.orbit1Controls = OrbitControl(menu3, menu4, orbit1TextVars, lambda: self.orbitCanvas.changeOrbitParams(0,self.cameraMatrix))		
 		
 		
 		centerX2 = StringVar()
@@ -156,14 +198,40 @@ class UAVautocalGUI(Tk):
 		cameraTilt2.set(cameraTilt2Init)
 		
 		orbit2TextVars = [majorAxis2, minorAxis2, centerX2, centerY2, axisYawAngle2, height2, cameraPan2, cameraTilt2, cameraUpAngle2]					
-		self.orbitCanvas.addOrbit(orbit2TextVars)															
-		self.orbit1Controls = OrbitControl(menu5, menu6, orbit2TextVars, lambda: self.orbitCanvas.changeOrbitParams(1,float(self.cameraFocalLength.get())))		
+		self.orbitCanvas.addOrbit(orbit2TextVars, xMax, yMax)															
+		self.orbit2Controls = OrbitControl(menu5, menu6, orbit2TextVars, lambda: self.orbitCanvas.changeOrbitParams(1,self.cameraMatrix))		
+		
+		centerX3 = StringVar()
+		centerX3.set(centerX3Init)
+		centerY3 = StringVar()
+		centerY3.set(centerY3Init)
+		majorAxis3 = StringVar()
+		majorAxis3.set(majorAxis3Init)
+		minorAxis3 = StringVar()
+		minorAxis3.set(minorAxis3Init)
+		axisYawAngle3 = StringVar()
+		axisYawAngle3.set(axisYawAngle3Init)
+		height3 = StringVar()
+		height3.set(height3Init)
+		cameraUpAngle3 = StringVar()
+		cameraUpAngle3.set(cameraUpAngle3Init)
+		cameraPan3 = StringVar()
+		cameraPan3.set(cameraPan3Init)
+		cameraTilt3 = StringVar()
+		cameraTilt3.set(cameraTilt3Init)
+		
+		orbit3TextVars = [majorAxis3, minorAxis3, centerX3, centerY3, axisYawAngle3, height3, cameraPan3, cameraTilt3, cameraUpAngle3]					
+		self.orbitCanvas.addOrbit(orbit3TextVars, xMax, yMax)															
+		self.orbit3Controls = OrbitControl(menu7, menu8, orbit3TextVars, lambda: self.orbitCanvas.changeOrbitParams(2,self.cameraMatrix))		
 		
 		# Where are we in the positional array?
 		self.npos = 0
 		
 		# Initial state of processing thread is empty
 		self.t = None
+		
+	def editCameraMatrix(self, pos, value):
+		self.cameraMatrix[pos] = value
 		
 	def actionButton(self):
 
@@ -172,7 +240,7 @@ class UAVautocalGUI(Tk):
 		   self.buttonState.getState() == ButtonState.ButtonState.State.LOADED:
 		
 			# Get an image
-			if self.orbitCanvas.loadOverhead(float(self.cameraFocalLength.get())):
+			if self.orbitCanvas.loadOverhead(self.cameraMatrix):
 				self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
 
 		# Action: Pause
@@ -186,7 +254,7 @@ class UAVautocalGUI(Tk):
 			self.buttonState.setState(ButtonState.ButtonState.State.LOADED)
 			self.npos = 0
 			self.orbit1Controls.enable()
-			self.orbitCanvas.calcFlightPath(float(self.cameraFocalLength.get()))
+			self.orbitCanvas.calcFlightPath(self.cameraMatrix)
 			
 	def runButton(self):
 		
